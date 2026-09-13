@@ -1,0 +1,23 @@
+{
+  "name": "jidamon",
+  "version": "0.1.0",
+  "description": "Serverless RAG Discord bot built with AWS, TypeScript, Node.js and C++",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "validate": "sam validate --region us-east-1",
+    "build": "sam build"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.0",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.1131.0",
+    "@aws-sdk/client-ssm": "^3.1131.0",
+    "@google/genai": "^2.22.0",
+    "discord-interactions": "^4.4.0"
+  }
+}

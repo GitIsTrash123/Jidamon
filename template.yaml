@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Jidamon Serverless RAG Discord Bot
+
+Resources:
+
+  JidamonAIQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: jidamon-ai-queue
+      VisibilityTimeout: 60
+
+
+  myJidamonJDMfunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures:
+        - x86_64
+
+      CodeUri: .
+
+      Description: Main Discord interaction handler for Jidamon
+
+      EphemeralStorage:
+        Size: 512
+
+      Handler: index.handler
+
+      MemorySize: 512
+      Timeout: 15
+
+      Runtime: nodejs24.x
+
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: Auto
+
+      SnapStart:
+        ApplyOn: None
+
+      Tracing: PassThrough
+
+      Role: >-
+        arn:aws:iam::176771123284:role/service-role/myJidamonJDMfunction-role-c0d0ejda
+
+      Environment:
+        Variables:
+          DISCORD_PUBLIC_KEY: "bbee4a60baeb9c4c34086449aa3d60dbb1b8f93cee4c35e1e630a363af248185"
+          JIDAMON_AI_QUEUE_URL: !Ref JidamonAIQueue
+
+      Events:
+        DiscordInteractions:
+          Type: HttpApi
+          Properties:
+            Path: /interactions
+            Method: POST
+
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/index.ts
+
+
+  JidamonAIWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures:
+        - x86_64
+
+      CodeUri: .
+
+      Description: Processes Jidamon AI requests from SQS
+
+      Handler: worker.handler
+
+      MemorySize: 512
+      Timeout: 30
+
+      Runtime: nodejs24.x
+
+      Role: >-
+        arn:aws:iam::176771123284:role/service-role/myJidamonJDMfunction-role-c0d0ejda
+
+      Events:
+        JidamonAIQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt JidamonAIQueue.Arn
+            BatchSize: 1
+
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/worker.ts
