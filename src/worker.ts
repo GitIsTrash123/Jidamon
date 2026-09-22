@@ -77,7 +77,7 @@ export const handler = async (event: any) => {
           await updateDiscordResponse(
             applicationId,
             interactionToken,
-            "Jidamon has reached its current daily AI usage limit. Please try again after the Gemini quota resets."
+            "Jidamon has reached its current daily AI usage limit. Please try again after the JDM quota resets."
           );
         } catch (discordError) {
           console.error(
